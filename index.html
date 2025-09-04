@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Teste do Café da manhã 💫</title>
+    <title>Teste do Café da manhã 💫</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root{
@@ -14,7 +14,7 @@
       margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
       background: linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3));
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color:#fff; overflow-y:auto;
+      color:#fff; overflow:hidden;
     }
     .wrap{
       width: min(680px, 92vw);
@@ -90,10 +90,47 @@
   <canvas id="confetti"></canvas>
   <div class="wrap">
     <div class="tip">modo ultra-secreto 🤫</div>
-    <h1>Teste do Café da manhã</h1>
+      <h1>Teste do Café da manhã</h1>
     <p class="lead">3 perguntinhas rápidas (prometo ser justo 😇)</p>
 
-    <!-- perguntas omitidas por brevidade; mantêm-se iguais -->
+    <div class="q" data-q="1">
+      <h3>1) Café ideal pra um encontro?</h3>
+      <div class="opts">
+        <span class="chip">Expresso</span>
+        <span class="chip">Latte</span>
+        <span class="chip">Capuccino</span>
+        <span class="chip">Gelado</span>
+      </div>
+    </div>
+
+    <div class="q" data-q="2">
+      <h3>2) Qual vibe de playlist?</h3>
+      <div class="opts">
+        <span class="chip">Indie chill</span>
+        <span class="chip">R&B</span>
+        <span class="chip">MPB moderna</span>
+        <span class="chip">Funk romântico</span>
+      </div>
+    </div>
+
+    <div class="q" data-q="3">
+      <h3>3) Melhor horário pra nos vermos?</h3>
+      <div class="opts">
+        <span class="chip">Cedo</span>
+        <span class="chip">Tarde</span>
+        <span class="chip">Noite</span>
+        <span class="chip">Surpreende-me</span>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn" id="start" disabled>Começar</button>
+    </div>
+
+    <div class="scan" id="scan">
+      <div class="bar"><div class="fill" id="fill"></div></div>
+      <pre class="log" id="log"></pre>
+    </div>
 
     <div class="result" id="result">
       <span class="badge">Compatibilidade</span>
@@ -107,17 +144,124 @@
   </div>
 
   <script>
-    /* ...lógica anterior inalterada... */
+    // --------- seleção de chips ----------
+    const qs = Array.from(document.querySelectorAll('.q'));
+    const startBtn = document.getElementById('start');
+    qs.forEach(q=>{
+      q.addEventListener('click', e=>{
+        if(e.target.classList.contains('chip')){
+          q.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+          e.target.classList.add('active');
+          // habilita quando todas respondidas
+          const allAnswered = qs.every(x => x.querySelector('.chip.active'));
+          startBtn.disabled = !allAnswered;
+        }
+      });
+    });
+
+    // --------- "scan" falso + logs ----------
+    const scanBox = document.getElementById('scan');
+    const fill = document.getElementById('fill');
+    const log = document.getElementById('log');
+    const result = document.getElementById('result');
+
+    const steps = [
+      "Coletando preferências ☕🎵📅",
+      "Treinando IA com memes e fofocas...",
+      "Calculando grau de sorrisinhos trocados 😁",
+      "Medindo sincronia de piscadas 👀",
+      "Otimizando agenda para encontro perfeito 📆",
+      "Ajustando borboletas no estômago 🦋",
+      "Pronto pra revelar?"
+    ];
+
+    function typeLine(text){
+      return new Promise(res=>{
+        let i=0; const id=setInterval(()=>{
+          log.textContent += text[i++] || '';
+          if(i>text.length){ clearInterval(id); log.textContent += "\n"; log.scrollTop = log.scrollHeight; res(); }
+        }, 14);
+      });
+    }
+
+    function fakeScan(){
+      scanBox.style.display='block';
+      log.textContent = "";
+      let p=0, target=111;
+      const tick = setInterval(()=>{
+        p += Math.random()*3 + 1;
+        if(p>target) p=target;
+        fill.style.width = p + '%';
+        if(p>=target){ clearInterval(tick); finish(); }
+      }, 70);
+
+      (async()=>{
+        for(const s of steps){ await typeLine("> " + s); await new Promise(r=>setTimeout(r, 180)); }
+      })();
+    }
+
+    startBtn.addEventListener('click', ()=>{
+      startBtn.disabled = true;
+      fakeScan();
+    });
+
+    // --------- resultado + confete ----------
+    const confettiCanvas = document.getElementById('confetti');
+    const ctx = confettiCanvas.getContext('2d');
+    let confettiParts = [], confettiAnim;
+
+    function resize(){
+      confettiCanvas.width = innerWidth;
+      confettiCanvas.height = innerHeight;
+    }
+    addEventListener('resize', resize); resize();
+
+    function shootConfetti(){
+      confettiParts = Array.from({length:160}).map(()=>({
+        x: Math.random()*confettiCanvas.width,
+        y: -10 - Math.random()*80,
+        r: 3 + Math.random()*5,
+        s: 1 + Math.random()*3,
+        a: Math.random()*Math.PI*2
+      }));
+      cancelAnimationFrame(confettiAnim);
+      (function loop(){
+        ctx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
+        confettiParts.forEach(p=>{
+          p.y += p.s; p.x += Math.sin(p.a+=0.03)*0.8;
+          ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+          // cores alternadas sem libs:
+          ctx.fillStyle = ['#20e3b2','#7f7fff','#e570ff','#ffd166','#06d6a0'][Math.floor(Math.random()*5)];
+          ctx.fill();
+        });
+        confettiAnim = requestAnimationFrame(loop);
+      })();
+      setTimeout(()=>cancelAnimationFrame(confettiAnim), 2600);
+    }
 
     function finish(){
       result.style.display='block';
       shootConfetti();
+      // link "Bora marcar": abre WhatsApp com mensagem pronta
       const msg = encodeURIComponent("Okay, o teste deu 111%. Quando a gente confirma com um café? ☕✨");
       const wa = `https://wa.me/5562994432636?text=${msg}`;
       document.getElementById('go').href = wa;
     }
 
-    // restante do script permanece igual
+    // --------- truque do botão "Não" ----------
+    const noBtn = document.getElementById('noBtn');
+    let shrink = 1;
+    noBtn.addEventListener('mouseover', ()=>{
+      shrink *= 0.86; // encolhe gradualmente
+      noBtn.style.transform = `scale(${Math.max(shrink,0.4)}) rotate(${(1-shrink)*10}deg)`;
+      if(shrink<0.55) noBtn.style.opacity = 0.8;
+      if(shrink<0.48) noBtn.textContent = "Certeza? 🙃";
+      if(shrink<0.42) noBtn.textContent = "Ok... mas pensa";
+    });
+    noBtn.addEventListener('click', ()=>{
+      // mesmo clicando, ainda assim sai convite (trollagem leve)
+      alert("Tudo bem! Mas se bater dúvida, o botão verde ainda tá te chamando 😉");
+    });
   </script>
 </body>
 </html>
