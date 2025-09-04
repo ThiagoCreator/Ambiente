@@ -1,3 +1,4 @@
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
 diff --git a/index.html b/index.html
 index 9a53f4a035d70b85a69dbf8e79a17689d8cfe53c..8966b4739273eb390053e3eab7e7165e4ee62f2c 100644
 --- a/index.html
@@ -7,8 +8,7 @@ index 9a53f4a035d70b85a69dbf8e79a17689d8cfe53c..8966b4739273eb390053e3eab7e7165e
  <html lang="pt-BR">
  <head>
    <meta charset="UTF-8" />
--  <title>Teste de Química Secreta 💫</title>
-+    <title>Teste do Café da manhã 💫</title>
+    <title>Teste do Café da manhã 💫</title>
    <meta name="viewport" content="width=device-width, initial-scale=1" />
    <style>
      :root{
@@ -87,3 +87,6 @@ index 9a53f4a035d70b85a69dbf8e79a17689d8cfe53c..8966b4739273eb390053e3eab7e7165e
      <div class="q" data-q="3">
        <h3>3) Melhor horário pra nos vermos?</h3>
        <div class="opts">
+ 
+EOF
+)
